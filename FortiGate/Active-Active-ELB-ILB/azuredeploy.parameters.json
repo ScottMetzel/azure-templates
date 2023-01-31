@@ -26,6 +26,12 @@
         "availabilityOptions": {
             "value": "Availability Set"
         },
+        "FortiGate1AvailabilityZone": {
+            "value": 1
+        },
+        "FortiGate2AvailabilityZone": {
+            "value": 2
+        },
         "acceleratedNetworking": {
             "value": "true"
         },
