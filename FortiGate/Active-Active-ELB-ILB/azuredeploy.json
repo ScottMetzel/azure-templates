@@ -158,6 +158,30 @@
         "description": "Deploy FortiGate VMs in an Availability Set or Availability Zones. If Availability Zones deployment is selected but the location does not support Availability Zones an Availability Set will be deployed. If Availability Zones deployment is selected and Availability Zones are available in the location, FortiGate A will be placed in Zone 1, FortiGate B will be placed in Zone 2"
       }
     },
+    "FortiGate1AvailabilityZone": {
+      "type": "int",
+      "defaultValue": 1,
+      "allowedValues": [
+        1,
+        2,
+        3
+      ],
+      "metadata": {
+        "description": "When 'Availability Zones' is set as the Availability Option, the Availability Zone of the first FortiGate VM."
+      }
+    },
+    "FortiGate2AvailabilityZone": {
+      "type": "int",
+      "defaultValue": 2,
+      "allowedValues": [
+        1,
+        2,
+        3
+      ],
+      "metadata": {
+        "description": "When 'Availability Zones' is set as the Availability Option, the Availability Zone of the second FortiGate VM."
+      }
+    },
     "acceleratedNetworking": {
       "type": "string",
       "defaultValue": "true",
@@ -452,12 +476,8 @@
     "externalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes',variables('externalLBName'),variables('externalLBProbeName'))]",
     "useAZ": "[and(not(empty(pickZones('Microsoft.Compute', 'virtualMachines', parameters('location')))), equals(parameters('availabilityOptions'), 'Availability Zones'))]",
     "pipZones": "[if(variables('useAZ'), pickZones('Microsoft.Network', 'publicIPAddresses', parameters('location'), 3), json('null'))]",
-    "zone1": [
-      "1"
-    ],
-    "zone2": [
-      "2"
-    ]
+    "firstZone": "[array(string(parameters('FortiGate1AvailabilityZone')))]",
+    "secondZone": "[array(string(parameters('FortiGate2AvailabilityZone')))]"
   },
   "resources": [
     {
@@ -992,7 +1012,7 @@
       "identity": {
         "type": "SystemAssigned"
       },
-      "zones": "[if(variables('useAZ'), variables('zone1'), json('null'))]",
+      "zones": "[if(variables('useAZ'), variables('firstZone'), json('null'))]",
       "plan": {
         "name": "[parameters('fortiGateImageSKU')]",
         "publisher": "[variables('imagePublisher')]",
@@ -1065,7 +1085,7 @@
       "identity": {
         "type": "SystemAssigned"
       },
-      "zones": "[if(variables('useAZ'), variables('zone2'), json('null'))]",
+      "zones": "[if(variables('useAZ'), variables('secondZone'), json('null'))]",
       "plan": {
         "name": "[parameters('fortiGateImageSKU')]",
         "publisher": "[variables('imagePublisher')]",

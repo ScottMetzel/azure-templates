@@ -129,6 +129,30 @@
         "description": "Deploy FortiGate VMs in an Availability Set or Availability Zones. If Availability Zones deployment is selected but the location does not support Availability Zones an Availability Set will be deployed. If Availability Zones deployment is selected and Availability Zones are available in the location, FortiGate A will be placed in Zone 1, FortiGate B will be placed in Zone 2"
       }
     },
+    "FortiGate1AvailabilityZone": {
+      "type": "int",
+      "defaultValue": 1,
+      "allowedValues": [
+        1,
+        2,
+        3
+      ],
+      "metadata": {
+        "description": "When 'Availability Zones' is set as the Availability Option, the Availability Zone of the first FortiGate VM."
+      }
+    },
+    "FortiGate2AvailabilityZone": {
+      "type": "int",
+      "defaultValue": 2,
+      "allowedValues": [
+        1,
+        2,
+        3
+      ],
+      "metadata": {
+        "description": "When 'Availability Zones' is set as the Availability Option, the Availability Zone of the second FortiGate VM."
+      }
+    },
     "acceleratedNetworking": {
       "type": "string",
       "defaultValue": "true",
@@ -435,12 +459,8 @@
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
     },
     "useAZ": "[and(not(empty(pickZones('Microsoft.Compute', 'virtualMachines', parameters('location')))), equals(parameters('availabilityOptions'), 'Availability Zones'))]",
-    "zone1": [
-      "1"
-    ],
-    "zone2": [
-      "2"
-    ],
+    "firstZone": "[array(string(parameters('FortiGate1AvailabilityZone')))]",
+    "secondZone": "[array(string(parameters('FortiGate2AvailabilityZone')))]",
     "vnetName": "[if(equals(parameters('vnetName'),''),concat(parameters('fortiGateNamePrefix'),'-VNET'),parameters('vnetName'))]",
     "subnet1Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet1Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet1Name')))]",
     "subnet2Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet2Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet2Name')))]",
@@ -1208,7 +1228,7 @@
       "identity": {
         "type": "SystemAssigned"
       },
-      "zones": "[if(variables('useAZ'), variables('zone1'), json('null'))]",
+      "zones": "[if(variables('useAZ'), variables('firstZone'), json('null'))]",
       "plan": {
         "name": "[parameters('fortiGateImageSKU')]",
         "publisher": "[variables('imagePublisher')]",
@@ -1296,7 +1316,7 @@
       "identity": {
         "type": "SystemAssigned"
       },
-      "zones": "[if(variables('useAZ'), variables('zone2'), json('null'))]",
+      "zones": "[if(variables('useAZ'), variables('secondZone'), json('null'))]",
       "plan": {
         "name": "[parameters('fortiGateImageSKU')]",
         "publisher": "[variables('imagePublisher')]",
